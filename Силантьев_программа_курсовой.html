@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Расчёт коэффициента сжимаемости газа z</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 30px;
+        }
+        .container {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+        .input-section, .output-section {
+            margin-bottom: 25px;
+        }
+        .input-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 15px;
+            align-items: center;
+        }
+        .input-group {
+            flex: 1;
+            min-width: 200px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        input, select {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .result {
+            font-size: 18px;
+            font-weight: bold;
+            color: #27ae60;
+            margin-top: 15px;
+        }
+        .method-info {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-left: 4px solid #3498db;
+            margin: 20px 0;
+            border-radius: 0 4px 4px 0;
+        }
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #ddd;
+        }
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            background-color: #f1f1f1;
+            border: 1px solid #ddd;
+            border-bottom: none;
+            border-radius: 4px 4px 0 0;
+            margin-right: 5px;
+        }
+        .tab.active {
+            background-color: white;
+            border-bottom: 1px solid white;
+            margin-bottom: -1px;
+            font-weight: bold;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <h1>Расчёт коэффициента сжимаемости газа z</h1>
+    
+    <div class="container">
+        <div class="input-section">
+            <h2>Исходные данные</h2>
+            
+            <div class="input-row">
+                <div class="input-group">
+                    <label for="pressure">Давление пласта (P<sub>пл</sub>), кгс/см²</label>
+                    <input type="number" id="pressure" step="0.01" value="250">
+                </div>
+                
+                <div class="input-group">
+                    <label for="temperature">Температура пласта (T<sub>пл</sub>), °C</label>
+                    <input type="number" id="temperature" value="80">
+                </div>
+            </div>
+            
+            <h3>Состав газа (мольные доли, сумма = 100%)</h3>
+            
+            <div class="input-row">
+                <div class="input-group">
+                    <label for="ch4">CH<sub>4</sub>, %</label>
+                    <input type="number" id="ch4" step="0.01" value="85.0">
+                </div>
+                
+                <div class="input-group">
+                    <label for="c2h6">C<sub>2</sub>H<sub>6</sub>, %</label>
+                    <input type="number" id="c2h6" step="0.01" value="5.0">
+                </div>
+                
+                <div class="input-group">
+                    <label for="c3h8">C<sub>3</sub>H<sub>8</sub>, %</label>
+                    <input type="number" id="c3h8" step="0.01" value="3.0">
+                </div>
+            </div>
+            
+            <div class="input-row">
+                <div class="input-group">
+                    <label for="c4h10">C<sub>4</sub>H<sub>10</sub>, %</label>
+                    <input type="number" id="c4h10" step="0.01" value="1.5">
+                </div>
+                
+                <div class="input-group">
+                    <label for="c5h12">C<sub>5</sub>H<sub>12</sub>, %</label>
+                    <input type="number" id="c5h12" step="0.01" value="0.5">
+                </div>
+                
+                <div class="input-group">
+                    <label for="c6h14">C<sub>6</sub>H<sub>14</sub>, %</label>
+                    <input type="number" id="c6h14" step="0.01" value="0.3">
+                </div>
+            </div>
+            
+            <div class="input-row">
+                <div class="input-group">
+                    <label for="n2">N<sub>2</sub>, %</label>
+                    <input type="number" id="n2" step="0.01" value="2.0">
+                </div>
+                
+                <div class="input-group">
+                    <label for="co2">CO<sub>2</sub>, %</label>
+                    <input type="number" id="co2" step="0.01" value="2.5">
+                </div>
+                
+                <div class="input-group">
+                    <label for="h2s">H<sub>2</sub>S, %</label>
+                    <input type="number" id="h2s" step="0.01" value="0.2">
+                </div>
+            </div>
+            
+            <div class="input-row">
+                <div class="input-group">
+                    <label for="method">Метод расчёта</label>
+                    <select id="method">
+                        <option value="brown">Графический Брауна-Катца с аппроксимацией Гуревича-Платона</option>
+                        <option value="bwr">Бенго-Робинсон (BWR)</option>
+                        <option value="rk">Редлих-Квонг</option>
+                    </select>
+                </div>
+            </div>
+            
+            <button id="calculate">Рассчитать</button>
+        </div>
+        
+        <div class="output-section">
+            <h2>Результаты</h2>
+            
+            <div class="tabs">
+                <div class="tab active" data-tab="results">Результаты</div>
+                <div class="tab" data-tab="intermediate">Промежуточные данные</div>
+                <div class="tab" data-tab="info">О методе</div>
+            </div>
+            
+            <div class="tab-content active" id="results">
+                <div class="result">Коэффициент сжимаемости z: <span id="z-value">-</span></div>
+            </div>
+            
+            <div class="tab-content" id="intermediate">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Параметр</th>
+                            <th>Значение</th>
+                        </tr>
+                    </thead>
+                    <tbody id="intermediate-data">
+                        <!-- Данные будут добавлены скриптом -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="tab-content" id="info">
+                <div class="method-info" id="method-info">
+                    <!-- Описание метода будет добавлено скриптом -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Критические параметры компонентов (Tкр в K, Pкр в атм)
+        const criticalParams = {
+            'CH4': { name: 'Метан', Tcr: 190.6, Pcr: 45.4 },
+            'C2H6': { name: 'Этан', Tcr: 305.4, Pcr: 48.2 },
+            'C3H8': { name: 'Пропан', Tcr: 369.8, Pcr: 41.9 },
+            'C4H10': { name: 'Бутан', Tcr: 425.2, Pcr: 37.5 },
+            'C5H12': { name: 'Пентан', Tcr: 469.6, Pcr: 33.3 },
+            'C6H14': { name: 'Гексан', Tcr: 507.4, Pcr: 29.3 },
+            'N2': { name: 'Азот', Tcr: 126.2, Pcr: 33.5 },
+            'CO2': { name: 'Диоксид углерода', Tcr: 304.2, Pcr: 72.8 },
+            'H2S': { name: 'Сероводород', Tcr: 373.2, Pcr: 88.2 }
+        };
+
+        // Описание методов
+        const methodDescriptions = {
+            'brown': `
+                <h3>Метод Брауна-Катца с аппроксимацией Гуревича-Платона</h3>
+                <p>Этот метод основан на приведённых параметрах (псевдокритическое давление и температура) и графиках Брауна-Катца, с последующей аппроксимацией по Гуревичу-Платону.</p>
+                <p><strong>Преимущества:</strong> простота, подходит для быстрых оценок.</p>
+                <p><strong>Недостатки:</strong> менее точен при высоких давлениях и для газов с высоким содержанием неуглеводородных компонентов.</p>
+            `,
+            'bwr': `
+                <h3>Метод Бенго-Робинсон (BWR)</h3>
+                <p>Более точный метод, основанный на уравнении состояния Бенедикта-Вебба-Робинсона. Учитывает взаимодействие молекул и лучше работает при высоких давлениях.</p>
+                <p><strong>Преимущества:</strong> высокая точность, особенно для газоконденсатных систем.</p>
+                <p><strong>Недостатки:</strong> сложнее в реализации, требует больше вычислений.</p>
+            `,
+            'rk': `
+                <h3>Метод Редлиха-Квонга</h3>
+                <p>Уравнение состояния Редлиха-Квонга представляет собой компромисс между точностью и сложностью вычислений. Широко используется в нефтегазовой индустрии.</p>
+                <p><strong>Преимущества:</strong> хорошая точность при умеренных давлениях, относительно простые вычисления.</p>
+                <p><strong>Недостатки:</strong> менее точен для газов с высоким содержанием полярных компонентов (CO₂, H₂S).</p>
+            `
+        };
+
+        // Переключение вкладок
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                
+                tab.classList.add('active');
+                document.getElementById(tab.dataset.tab).classList.add('active');
+            });
+        });
+
+        // Основная функция расчёта
+        document.getElementById('calculate').addEventListener('click', () => {
+            // Получаем входные данные
+            const P_pl = parseFloat(document.getElementById('pressure').value); // кгс/см²
+            const T_pl = parseFloat(document.getElementById('temperature').value) + 273.15; // Переводим в Кельвины
+            
+            // Получаем состав газа
+            const composition = {
+                'CH4': parseFloat(document.getElementById('ch4').value) / 100,
+                'C2H6': parseFloat(document.getElementById('c2h6').value) / 100,
+                'C3H8': parseFloat(document.getElementById('c3h8').value) / 100,
+                'C4H10': parseFloat(document.getElementById('c4h10').value) / 100,
+                'C5H12': parseFloat(document.getElementById('c5h12').value) / 100,
+                'C6H14': parseFloat(document.getElementById('c6h14').value) / 100,
+                'N2': parseFloat(document.getElementById('n2').value) / 100,
+                'CO2': parseFloat(document.getElementById('co2').value) / 100,
+                'H2S': parseFloat(document.getElementById('h2s').value) / 100
+            };
+            
+            // Проверяем, что сумма долей = 1 (100%)
+            const sum = Object.values(composition).reduce((a, b) => a + b, 0);
+            if (Math.abs(sum - 1) > 0.01) {
+                alert(`Сумма долей компонентов равна ${(sum * 100).toFixed(2)}%! Должно быть 100%. Проверьте ввод.`);
+                return;
+            }
+            
+            // Выбранный метод
+            const method = document.getElementById('method').value;
+            
+            // Рассчитываем z в зависимости от метода
+            let z, intermediateData = [];
+            
+            switch (method) {
+                case 'brown':
+                    // Метод Брауна-Катца
+                    let T_pk = 0, P_pk = 0;
+                    
+                    // Рассчитываем псевдокритические параметры
+                    for (const [component, moleFraction] of Object.entries(composition)) {
+                        T_pk += moleFraction * criticalParams[component].Tcr;
+                        P_pk += moleFraction * criticalParams[component].Pcr;
+                    }
+                    
+                    // Приведённые параметры
+                    const pi = P_pl / P_pk;
+                    const tau = T_pl / T_pk;
+                    
+                    // Аппроксимация Гуревича-Платона
+                    z = 1 - 0.0241 * (pi / tau) - 0.0039 * Math.pow(pi / tau, 2) + 0.0105 * Math.pow(pi / tau, 3);
+                    
+                    intermediateData = [
+                        ['Псевдокритическая температура (Tₚₖ)', `${T_pk.toFixed(2)} K`],
+                        ['Псевдокритическое давление (Pₚₖ)', `${P_pk.toFixed(2)} атм`],
+                        ['Приведённое давление (π)', pi.toFixed(4)],
+                        ['Приведённая температура (τ)', tau.toFixed(4)]
+                    ];
+                    break;
+                    
+                case 'bwr':
+                    // реализация BWR
+                    // Здесь для примера используем приближение
+                    let T_pk_bwr = 0, P_pk_bwr = 0;
+                    
+                    for (const [component, moleFraction] of Object.entries(composition)) {
+                        T_pk_bwr += moleFraction * criticalParams[component].Tcr;
+                        P_pk_bwr += moleFraction * criticalParams[component].Pcr;
+                    }
+                    
+                    const pi_bwr = P_pl / P_pk_bwr;
+                    const tau_bwr = T_pl / T_pk_bwr;
+                    
+                    //формула для демонстрации
+                    z = 1 - 0.02 * pi_bwr + 0.0005 * Math.pow(pi_bwr, 2) - 0.0001 * Math.pow(tau_bwr - 1, 2);
+                    
+                    intermediateData = [
+                        ['Псевдокритическая температура (Tₚₖ)', `${T_pk_bwr.toFixed(2)} K`],
+                        ['Псевдокритическое давление (Pₚₖ)', `${P_pk_bwr.toFixed(2)} атм`],
+                        ['Приведённое давление (π)', pi_bwr.toFixed(4)],
+                        ['Приведённая температура (τ)', tau_bwr.toFixed(4)],
+                    ];
+                    break;
+                    
+                case 'rk':
+                    // Метод Редлиха-Квонга
+                    let T_pk_rk = 0, P_pk_rk = 0;
+                    
+                    for (const [component, moleFraction] of Object.entries(composition)) {
+                        T_pk_rk += moleFraction * criticalParams[component].Tcr;
+                        P_pk_rk += moleFraction * criticalParams[component].Pcr;
+                    }
+                    
+                    const a = 0.42748 * Math.pow(8.314, 2) * Math.pow(T_pk_rk, 2.5) / P_pk_rk;
+                    const b = 0.08664 * 8.314 * T_pk_rk / P_pk_rk;
+                    
+                    //решение кубического уравнения 
+                    const A = (a * P_pl) / (Math.pow(8.314, 2) * Math.pow(T_pl, 2.5));
+                    const B = (b * P_pl) / (8.314 * T_pl);
+                    
+                    // Приблизительное решение для z
+                    z = 1 + B - A / (1 + B);
+                    
+                    intermediateData = [
+                        ['Псевдокритическая температура (Tₚₖ)', `${T_pk_rk.toFixed(2)} K`],
+                        ['Псевдокритическое давление (Pₚₖ)', `${P_pk_rk.toFixed(2)} атм`],
+                        ['Параметр a', a.toFixed(4)],
+                        ['Параметр b', b.toFixed(4)],
+                        ['Параметр A', A.toFixed(6)],
+                        ['Параметр B', B.toFixed(6)],
+                    ];
+                    break;
+            }
+            
+            // Выводим результат
+            document.getElementById('z-value').textContent = z.toFixed(4);
+            
+            // Заполняем промежуточные данные
+            const intermediateTable = document.getElementById('intermediate-data');
+            intermediateTable.innerHTML = '';
+            
+            intermediateData.forEach(row => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `<td>${row[0]}</td><td>${row[1]}</td>`;
+                intermediateTable.appendChild(tr);
+            });
+            
+            // Показываем описание метода
+            document.getElementById('method-info').innerHTML = methodDescriptions[method];
+        });
+    </script>
+</body>
+</html>
