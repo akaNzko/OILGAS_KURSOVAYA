@@ -143,7 +143,7 @@
                 </div>
             </div>
             
-            <h3>Состав газа (мольные доли, сумма = 100%)</h3>
+            <h3>Состав газа</h3>
             
             <div class="input-row">
                 <div class="input-group">
@@ -309,8 +309,8 @@
                     throw new Error('Давление не может быть отрицательным');
                 }
                 
-                if (T_pl_C < -273.15) {
-                    throw new Error('Температура не может быть ниже абсолютного нуля (-273.15°C)');
+                if (T_pl_C < 0) {
+                    throw new Error('Температура не может быть ниже нуля');
                 }
                 
                 const T_pl = T_pl_C + 273.15; // Переводим в Кельвины
@@ -327,19 +327,23 @@
                     'CO2': parseFloat(document.getElementById('co2').value) / 100,
                     'H2S': parseFloat(document.getElementById('h2s').value) / 100
                 };
+                            
+                
+                for (const [component, percent] of Object.entries(composition)) {
+                    if (percent < 0) {
+                        throw new Error('Обнаружены отрицательные значения в составе газа');
+                }
+            }
                 
                 // Проверяем, что сумма долей = 1 (100%)
                 const sum = Object.values(composition).reduce((a, b) => a + b, 0);
-                if (Math.abs(sum - 1) > 0.01) {
-                    throw new Error(`Сумма долей компонентов равна ${(sum * 100).toFixed(2)}%. Должно быть 100%. Проверьте входные данные.`);
+            if (Math.abs(sum - 1) > 0.000001) {
+                if (sum < 1) {
+                    throw new Error(`Сумма долей компонентов равна ${(sum * 100).toFixed(5)}%. Это меньше 100%. Проверьте входные данные.`);
+                } else {
+                    throw new Error(`Сумма долей компонентов равна ${(sum * 100).toFixed(5)}%. Это больше 100%. Проверьте входные данные.`);
                 }
-                
-                // Проверяем, что все доли неотрицательны
-                for (const [component, moleFraction] of Object.entries(composition)) {
-                    if (moleFraction < 0) {
-                        throw new Error(`Мольная доля ${criticalParams[component].name} не может быть отрицательной`);
-                    }
-                }
+            }
                 
                 // Выбранный метод
                 const method = document.getElementById('method').value;
@@ -398,8 +402,6 @@
                         //формула для демонстрации
                         z = 1 - 0.02 * pi_bwr + 0.0005 * Math.pow(pi_bwr, 2) - 0.0001 * Math.pow(tau_bwr - 1, 2);
                         
-                        // Ограничиваем z разумными пределами
-                        z = Math.max(0.1, Math.min(z, 2.0));
                         
                         intermediateData = [
                             ['Псевдокритическая температура (Tₚₖ)', `${T_pk_bwr.toFixed(2)} K`],
@@ -428,8 +430,6 @@
                         // Приблизительное решение для z
                         z = 1 + B - A / (1 + B);
                         
-                        // Ограничиваем z разумными пределами
-                        z = Math.max(0.1, Math.min(z, 2.0));
                         
                         intermediateData = [
                             ['Псевдокритическая температура (Tₚₖ)', `${T_pk_rk.toFixed(2)} K`],
@@ -463,14 +463,14 @@
                 // Показываем описание метода
                 document.getElementById('method-info').innerHTML = methodDescriptions[method];
                 
-            } catch (error) {
-                errorMessage.textContent = error.message;
-                errorMessage.style.display = 'block';
-                document.getElementById('z-value').textContent = '-';
-                document.getElementById('intermediate-data').innerHTML = '';
-                document.getElementById('method-info').innerHTML = '';
-            }
-        });
+        } catch (error) {
+            errorMessage.textContent = error.message;
+            errorMessage.style.display = 'block';
+            document.getElementById('z-value').textContent = '-';
+            document.getElementById('intermediate-data').innerHTML = '';
+            document.getElementById('method-info').innerHTML = '';
+        }
+    });
     </script>
 </body>
 </html>
